@@ -1,0 +1,22 @@
+# Here is the example configure the SQS
+Resources:
+  SendMailQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: ${self:custom.sqs-send-mail}
+      VisibilityTimeout: 960 # Should be > Lambda's timeout
+      ReceiveMessageWaitTimeSeconds: 20
+      RedrivePolicy:
+        deadLetterTargetArn:
+          Fn::GetAtt:
+            - NormalDeadLetterQueue
+            - Arn
+        maxReceiveCount: 1
+  
+  SendMailDeadLetterQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: ${self:custom.sqs-send-mail-dlq}
+      MessageRetentionPeriod: 1209600 # 14 Days
+      ReceiveMessageWaitTimeSeconds: 20
+      VisibilityTimeOut: 30
